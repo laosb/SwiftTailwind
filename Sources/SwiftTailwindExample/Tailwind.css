@@ -1,0 +1,7 @@
+/** SwiftTailwind assumes a Tailwind.css file is present in the root of target directory. **/
+
+/** To align with Swift Package Manager's build plugin capability, SwiftTailwind requires explicitly register all inputs. */
+/** You must specify `source(none)` after `tailwindcss` import and add `@source` for each source file / folder you want to include. */
+@import "tailwindcss" source(none);
+@source "./Example.swift";
+@source "./Folder";
