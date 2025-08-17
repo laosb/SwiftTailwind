@@ -3,6 +3,7 @@
   "artifacts": {
     "tailwindcss": {
       "version": "%VERSION%",
+      "type": "executable",
       "variants": [
         {
           "path": "tailwindcss-%VERSION%-macos-x64/bin/tailwindcss",
