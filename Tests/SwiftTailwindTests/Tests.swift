@@ -18,6 +18,10 @@ struct SwiftTailwindExampleTests {
       "Arbitary value class used in Test.html is generated."
     )
     #expect(
+      generatedCSS?.contains("bg-red-100") == true,
+      "Arbitary value class used in Folder/Template.swift is generated."
+    )
+    #expect(
       generatedCSS?.contains("bg-blue-500") == false,
       "Class not used is not generated."
     )

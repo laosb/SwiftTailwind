@@ -5,3 +5,4 @@
 @import "tailwindcss" source(none);
 @source "./Example.swift";
 @source "./Folder";
+@source "./Folder/**/*.swift";

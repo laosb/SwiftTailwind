@@ -65,8 +65,10 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
       .matches(of: sourceDeclarationRegex)
       .compactMap { String($0.output.1) }
     let sourceURLs: [URL] = sourcePaths.map { path in
-      target.directoryURL
-        .appending(component: path, directoryHint: .inferFromPath)
+      // Simplified handling: If ** is used, we just include everything in the directory.
+      let globlessPath = path.replacing(/\*\*.*/, with: "")
+      return target.directoryURL
+        .appending(component: globlessPath, directoryHint: .inferFromPath)
         .resolvingSymlinksInPath()
     }
 

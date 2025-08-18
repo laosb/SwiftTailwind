@@ -29,7 +29,8 @@ Place your Tailwind CSS entrypoint file at `Tailwind.css` in your target. To int
 
 ```css
 @import "tailwindcss" source(none);
-@source "./Views";
+/* Note that as of writing, Tailwind doesn't scan .swift files by default, so you need to specify a glob pattern including the extension. */
+@source "./Views/**/*.swift";
 @source "./Template.swift";
 @source "./Static";
 ```
