@@ -8,7 +8,7 @@ Add this package to your Swift project as a dependency using the Swift Package M
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/laosb/SwiftTailwind.git", from: "4.1.12"),
+  .package(url: "https://github.com/laosb/SwiftTailwind.git", from: "1.0.0+tw.4.1.12"),
 ],
 ```
 
