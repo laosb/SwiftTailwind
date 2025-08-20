@@ -18,7 +18,7 @@ let package = Package(
     ),
     .target(
       name: "SwiftTailwindExample",
-      resources: [.copy("Folder")],
+      resources: [.copy("Views/Test.html")],
       plugins: ["TailwindCSS"]
     ),
     .testTarget(name: "SwiftTailwindTests", dependencies: ["SwiftTailwindExample"]),
