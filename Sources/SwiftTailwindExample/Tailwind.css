@@ -4,5 +4,5 @@
 /** You must specify `source(none)` after `tailwindcss` import and add `@source` for each source file / folder you want to include. */
 @import "tailwindcss" source(none);
 @source "./Example.swift";
-@source "./Folder";
-@source "./Folder/**/*.swift";
+@source "./Views";
+@source "./Views/**/*.swift";

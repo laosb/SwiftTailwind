@@ -48,6 +48,10 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
     context: PluginContext,
     target: Target
   ) throws -> [Command] {
+    guard let sourceFileURLs = target.sourceModule?.sourceFiles.map({ $0.url }) else {
+      throw BuildError.notASourceModule
+    }
+
     let tailwindCSSURL: URL = target.directoryURL.appending(component: "Tailwind.css")
     guard let cssContent = try? String(contentsOf: tailwindCSSURL) else {
       throw BuildError.missingTailwindCSSFile
@@ -60,16 +64,23 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
       throw BuildError.sourceNotDeclarationUnsupported
     }
 
-    let sourcePaths =
+    let sourcePatterns =
       cssContent
       .matches(of: sourceDeclarationRegex)
       .compactMap { String($0.output.1) }
-    let sourceURLs: [URL] = sourcePaths.map { path in
-      // Simplified handling: If ** is used, we just include everything in the directory.
+    let sourcePatternURLs: [URL] = sourcePatterns.map { path in
+      // Simplified handling: If `**` is used, we just include everything in the directory.
+      // It's unlikely we will have the same glob processing logic as Tailwind CSS CLI,
+      // so we may as well just expand the coverage.
+      // This only affects SwiftPM change detection: Tailwind CSS CLI will handle the globbing correctly.
       let globlessPath = path.replacing(/\*\*.*/, with: "")
       return target.directoryURL
         .appending(component: globlessPath, directoryHint: .inferFromPath)
         .resolvingSymlinksInPath()
+    }
+
+    let includedSourceURLs = sourceFileURLs.filter { file in
+      sourcePatternURLs.contains { file.isOrIsDescendant(of: $0) }
     }
 
     let tailwindCLIURL: URL = try context.tool(named: "tailwindcss").url
@@ -79,9 +90,10 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
       component: outputCSSFilename, directoryHint: .notDirectory)
 
     print("Tailwind CSS Build Plugin")
-    print("Tailwind CSS File: \(tailwindCSSURL.path)")
-    print("@source declarations: \(sourcePaths)")
-    print("Source files: \(sourceURLs.map(\.path))")
+    print("Tailwind.css: \(tailwindCSSURL.path)")
+    print("@source declarations: \(sourcePatterns)")
+    print("All source files: \(sourceFileURLs.map(\.path))")
+    print("Input files: \(includedSourceURLs.map(\.path))")
     print("Output: \(outputURL.path)")
 
     return [
@@ -93,7 +105,7 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
           "--output", outputURL.path,
           "--minify",
         ],
-        inputFiles: [tailwindCSSURL] + sourceURLs,
+        inputFiles: [tailwindCSSURL] + includedSourceURLs,
         outputFiles: [outputBundleURL]
       )
     ]
@@ -102,12 +114,15 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
 
 extension TailwindCSSBuildPlugin {
   enum BuildError: Error {
+    case notASourceModule
     case missingTailwindCSSFile
     case missingImportStatement
     case sourceNotDeclarationUnsupported
 
     var localizedDescription: String {
       switch self {
+      case .notASourceModule:
+        "The target is not a source module."
       case .missingTailwindCSSFile:
         "Tailwind.css file not found in the target directory."
       case .missingImportStatement:

@@ -22,6 +22,10 @@ struct SwiftTailwindExampleTests {
       "Arbitary value class used in Folder/Template.swift is generated."
     )
     #expect(
+      generatedCSS?.contains("text-sm") == false,
+      "Class used in other non-included Swift code is not generated."
+    )
+    #expect(
       generatedCSS?.contains("bg-blue-500") == false,
       "Class not used is not generated."
     )
