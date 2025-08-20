@@ -53,7 +53,7 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
     }
 
     let tailwindCSSURL: URL = target.directoryURL.appending(component: "Tailwind.css")
-    guard let cssContent = try? String(contentsOf: tailwindCSSURL) else {
+    guard let cssContent = try? String(contentsOf: tailwindCSSURL, encoding: .utf8) else {
       throw BuildError.missingTailwindCSSFile
     }
     let matches = cssContent.matches(of: importStatementRegex)
