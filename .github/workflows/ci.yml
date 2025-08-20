@@ -19,15 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Swift packages
-        uses: actions/cache@v4
-        with:
-          path: .build
-          key: ${{ runner.os }}-swift-${{ matrix.swift-version }}-${{ hashFiles('**/Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-swift-${{ matrix.swift-version }}-
-            ${{ runner.os }}-swift-
-
       - name: Build package
         run: swift build --verbose
 
@@ -48,15 +39,6 @@ jobs:
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: ${{ matrix.swift-version }}
-
-      - name: Cache Swift packages
-        uses: actions/cache@v4
-        with:
-          path: .build
-          key: ${{ runner.os }}-swift-${{ matrix.swift-version }}-${{ hashFiles('**/Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-swift-${{ matrix.swift-version }}-
-            ${{ runner.os }}-swift-
 
       - name: Build package
         run: swift build --verbose
