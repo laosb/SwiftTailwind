@@ -30,7 +30,7 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
     "@source"
     ZeroOrMore(.whitespace)
     "\""
-    Capture(ZeroOrMore(.word))
+    Capture { OneOrMore(CharacterClass.anyOf("\"").inverted) }
     "\""
     ZeroOrMore(.whitespace)
     ";"
@@ -78,9 +78,10 @@ struct TailwindCSSBuildPlugin: BuildToolPlugin {
     let outputURL = outputBundleURL.appending(
       component: outputCSSFilename, directoryHint: .notDirectory)
 
-    print("Tailwind CSS Build Plugin: \(tailwindCSSURL.path)")
+    print("Tailwind CSS Build Plugin")
     print("Tailwind CSS File: \(tailwindCSSURL.path)")
-    print("Source files: \n -\(sourceURLs.map(\.path).joined(separator: "\n -"))")
+    print("@source declarations: \(sourcePaths)")
+    print("Source files: \(sourceURLs.map(\.path))")
     print("Output: \(outputURL.path)")
 
     return [
