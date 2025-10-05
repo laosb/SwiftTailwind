@@ -28,7 +28,7 @@ struct ArtifactVariant: Codable {
 /// Represents the .artifactbundleindex file structure
 struct ArtifactBundleIndex: Codable {
   let schemaVersion: String
-  let bundles: [Bundle]
+  let archives: [Bundle]  // The proposal says it's "bundles" but the actual implementation uses "archives"
 }
 
 struct Bundle: Codable {

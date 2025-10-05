@@ -225,7 +225,7 @@ class ArtifactBundleBuilder {
 
     let index = ArtifactBundleIndex(
       schemaVersion: "1.0",
-      bundles: bundles
+      archives: bundles
     )
 
     let encoder = JSONEncoder()
