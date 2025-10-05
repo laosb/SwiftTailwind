@@ -1,11 +1,10 @@
-import Crypto
 import Foundation
 
 class ArtifactBundleBuilder {
   private let version: String
   private let workDir: String
   private let outputDir: String
-  private let fileManager = FileManager.default
+  let fileManager = FileManager.default
 
   private let binaryConfigurations: [BinaryConfiguration] = [
     BinaryConfiguration(binaryName: "tailwindcss-linux-x64", triple: "x86_64-unknown-linux-gnu"),
@@ -106,20 +105,6 @@ class ArtifactBundleBuilder {
     return BundleInfo(fileName: zipFileName, checksum: checksum, triple: config.triple)
   }
 
-  private func downloadFile(from urlString: String, to destination: String) throws {
-    guard let url = URL(string: urlString) else {
-      throw ArtifactBundleError.invalidURL(urlString)
-    }
-
-    let data = try Data(contentsOf: url)
-    try data.write(to: URL(fileURLWithPath: destination))
-  }
-
-  private func makeExecutable(path: String) throws {
-    let attributes = [FileAttributeKey.posixPermissions: 0o755]
-    try fileManager.setAttributes(attributes, ofItemAtPath: path)
-  }
-
   private func createInfoJSON(bundleDir: String, binaryPath: String, triple: String) throws {
     let artifact = Artifact(
       version: version,
@@ -142,71 +127,6 @@ class ArtifactBundleBuilder {
     try jsonData.write(to: URL(fileURLWithPath: infoPath))
   }
 
-  private func createZipFile(bundleDir: String, zipPath: String) throws {
-    // Remove existing ZIP file if it exists
-    if fileManager.fileExists(atPath: zipPath) {
-      try fileManager.removeItem(atPath: zipPath)
-    }
-
-    let bundleDirURL = URL(fileURLWithPath: bundleDir)
-    let workDirURL = bundleDirURL.deletingLastPathComponent()
-    let bundleName = bundleDirURL.lastPathComponent
-
-    let process = Process()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-    process.arguments = ["-r", zipPath, bundleName]
-    process.currentDirectoryURL = workDirURL
-
-    try process.run()
-    process.waitUntilExit()
-
-    guard process.terminationStatus == 0 else {
-      throw ArtifactBundleError.zipCreationFailed
-    }
-  }
-
-  /// Computes the SHA256 checksum of a file.
-  ///
-  /// If `usingSHA256Directly` is true, it uses Swift Crypto's SHA256 implementation.
-  /// This is to workaround https://github.com/swiftlang/swift-package-manager/issues/9219.
-  private func computeChecksum(
-    filePath: String,
-    usingSHA256Directly: Bool = false
-  ) throws -> String {
-    if usingSHA256Directly {
-      // Use swift-crypto's SHA256 implementation
-      let fileURL = URL(fileURLWithPath: filePath)
-      let data = try Data(contentsOf: fileURL)
-      let hash = SHA256.hash(data: data)
-      return hash.compactMap { String(format: "%02x", $0) }.joined()
-    } else {
-      // Use swift package compute-checksum command
-      let process = Process()
-      process.executableURL = URL(fileURLWithPath: "/usr/bin/swift")
-      process.arguments = ["package", "compute-checksum", filePath]
-
-      let pipe = Pipe()
-      process.standardOutput = pipe
-
-      try process.run()
-      process.waitUntilExit()
-
-      guard process.terminationStatus == 0 else {
-        throw ArtifactBundleError.checksumComputationFailed
-      }
-
-      let data = pipe.fileHandleForReading.readDataToEndOfFile()
-      let output = String(data: data, encoding: .utf8)?.trimmingCharacters(
-        in: .whitespacesAndNewlines)
-
-      guard let checksum = output, !checksum.isEmpty else {
-        throw ArtifactBundleError.checksumComputationFailed
-      }
-
-      return checksum
-    }
-  }
-
   private func generateArtifactBundleIndex(bundleInfos: [BundleInfo]) throws {
     print("Generating tailwindcss.artifactbundleindex...")
 
@@ -219,7 +139,7 @@ class ArtifactBundleBuilder {
       Bundle(
         fileName: bundleInfo.fileName,
         checksum: bundleInfo.checksum,
-        supportedTriples: [bundleInfo.triple]
+        supportedTriples: expandingTriple(bundleInfo.triple)
       )
     }
 
@@ -234,22 +154,5 @@ class ArtifactBundleBuilder {
     let jsonData = try encoder.encode(index)
     let indexPath = "\(outputDir)/tailwindcss.artifactbundleindex"
     try jsonData.write(to: URL(fileURLWithPath: indexPath))
-  }
-}
-
-enum ArtifactBundleError: Error, LocalizedError {
-  case invalidURL(String)
-  case zipCreationFailed
-  case checksumComputationFailed
-
-  var errorDescription: String? {
-    switch self {
-    case .invalidURL(let url):
-      return "Invalid URL: \(url)"
-    case .zipCreationFailed:
-      return "Failed to create ZIP file"
-    case .checksumComputationFailed:
-      return "Failed to compute checksum"
-    }
   }
 }
