@@ -110,7 +110,7 @@ class ArtifactBundleBuilder {
       version: version,
       type: "executable",
       variants: [
-        ArtifactVariant(path: binaryPath, supportedTriples: [triple])
+        ArtifactVariant(path: binaryPath, supportedTriples: expandingTriple(triple))
       ]
     )
 
