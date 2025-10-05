@@ -6,9 +6,21 @@ let package = Package(
   name: "SwiftTailwind",
   platforms: [.macOS(.v12)],
   products: [
-    .plugin(name: "TailwindCSS", targets: ["TailwindCSS"])
+    .plugin(name: "TailwindCSS", targets: ["TailwindCSS"]),
+    .executable(name: "TailwindCSSCLIArtifactBundler", targets: ["TailwindCSSCLIArtifactBundler"]),
+  ],
+  dependencies: [
+    .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
+    .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
   ],
   targets: [
+    .executableTarget(
+      name: "TailwindCSSCLIArtifactBundler",
+      dependencies: [
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "Crypto", package: "swift-crypto"),
+      ]
+    ),
     .plugin(name: "TailwindCSS", capability: .buildTool(), dependencies: ["TailwindCSSCLI"]),
     .binaryTarget(
       name: "TailwindCSSCLI",
