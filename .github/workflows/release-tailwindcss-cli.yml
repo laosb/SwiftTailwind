@@ -49,11 +49,11 @@ jobs:
       - name: Create artifact bundles
         run: |
           echo "Creating artifact bundles for TailwindCSS ${{ inputs.tailwind_version }}..."
-          mkdir -p artifacts
+          mkdir -p ./artifacts
           .build/release/TailwindCSSCLIArtifactBundler \
             --version "${{ inputs.tailwind_version }}" \
             --work-dir "${{ runner.temp }}/tailwindcss-bundles" \
-            --output-dir artifacts
+            --output-dir ./artifacts
 
       - name: List generated artifacts
         run: |
