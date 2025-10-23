@@ -1,0 +1,104 @@
+name: Release TailwindCSS CLI Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      tailwind_version:
+        description: "TailwindCSS release version (e.g., v4.1.14)"
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    name: Build and Release Artifacts
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.1"
+
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-release-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-release-
+            ${{ runner.os }}-spm-
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ inputs.tailwind_version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must be in format vX.Y.Z (e.g., v4.1.14)"
+            exit 1
+          fi
+          echo "Version format is valid: ${{ inputs.tailwind_version }}"
+
+      - name: Build artifact bundler
+        run: |
+          echo "Building TailwindCSSCLIArtifactBundler..."
+          swift build -c release --product TailwindCSSCLIArtifactBundler
+
+      - name: Create artifact bundles
+        run: |
+          echo "Creating artifact bundles for TailwindCSS ${{ inputs.tailwind_version }}..."
+          mkdir -p artifacts
+          .build/release/TailwindCSSCLIArtifactBundler \
+            --version "${{ inputs.tailwind_version }}" \
+            --work-dir "${{ runner.temp }}/tailwindcss-bundles" \
+            --output-dir artifacts
+
+      - name: List generated artifacts
+        run: |
+          echo "Generated artifacts:"
+          ls -lh artifacts/
+
+      - name: Compute checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(shasum -a 256 artifacts/tailwindcss.artifactbundleindex | awk '{print $1}')
+          echo "checksum=$CHECKSUM" >> $GITHUB_OUTPUT
+          echo "Artifact bundle index checksum: $CHECKSUM"
+
+      - name: Create release
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        with:
+          tag_name: TailwindCSSCLI-${{ inputs.tailwind_version }}
+          name: TailwindCSS CLI ${{ inputs.tailwind_version }}
+          body: |
+            ## TailwindCSS CLI Artifact Bundles
+
+            This release contains Swift Package Manager artifact bundles for TailwindCSS CLI version `${{ inputs.tailwind_version }}`.
+
+            ### Included Artifacts
+            - Linux x64 (`x86_64-unknown-linux-gnu`)
+            - macOS x64 (`x86_64-apple-darwin`)
+            - macOS ARM64 (`aarch64-apple-darwin`)
+
+            ### Usage
+            Add the artifact bundle to your `Package.swift`:
+            ```swift
+            .binaryTarget(
+              name: "TailwindCSSCLI",
+              url: "https://github.com/${{ github.repository }}/releases/download/TailwindCSSCLI@${{ inputs.tailwind_version }}/tailwindcss.artifactbundleindex",
+              checksum: "${{ steps.checksum.outputs.checksum }}"
+            )
+            ```
+
+            ### Checksum
+            ```
+            ${{ steps.checksum.outputs.checksum }}
+            ```
+          draft: false
+          prerelease: false
+          make_latest: false
+          files: |
+            artifacts/*.zip
+            artifacts/tailwindcss.artifactbundleindex
