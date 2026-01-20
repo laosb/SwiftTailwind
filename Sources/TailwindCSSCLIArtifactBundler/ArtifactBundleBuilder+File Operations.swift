@@ -21,12 +21,9 @@ extension ArtifactBundleBuilder {
       try fileManager.removeItem(atPath: zipPath)
     }
 
-    let bundleDirURL = URL(fileURLWithPath: bundleDir)
-    let bundleName = bundleDirURL.lastPathComponent
-
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
-    process.arguments = ["-r", zipPath, bundleName]
+    process.arguments = ["-r", zipPath, bundleDir]
 
     try process.run()
     process.waitUntilExit()
