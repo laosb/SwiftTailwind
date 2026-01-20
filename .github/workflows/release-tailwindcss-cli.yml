@@ -70,7 +70,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
-          tag_name: TailwindCSSCLI-${{ inputs.tailwind_version }}
+          tag_name: TailwindCSSCLI-${{ inputs.tailwind_version }}-${{ steps.checksum.outputs.checksum }}
           name: TailwindCSS CLI ${{ inputs.tailwind_version }}
           body: |
             ## TailwindCSS CLI Artifact Bundles
@@ -82,19 +82,13 @@ jobs:
             - macOS x64 (`x86_64-apple-darwin`)
             - macOS ARM64 (`aarch64-apple-darwin`)
 
-            ### Usage
-            Add the artifact bundle to your `Package.swift`:
+            ### Binary Target Definition
             ```swift
             .binaryTarget(
               name: "TailwindCSSCLI",
-              url: "https://github.com/${{ github.repository }}/releases/download/TailwindCSSCLI@${{ inputs.tailwind_version }}/tailwindcss.artifactbundleindex",
+              url: "https://github.com/${{ github.repository }}/releases/download/TailwindCSSCLI-${{ inputs.tailwind_version }}-${{ steps.checksum.outputs.checksum }}/tailwindcss.artifactbundleindex",
               checksum: "${{ steps.checksum.outputs.checksum }}"
             )
-            ```
-
-            ### Checksum
-            ```
-            ${{ steps.checksum.outputs.checksum }}
             ```
           draft: false
           prerelease: false
