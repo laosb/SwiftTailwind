@@ -22,14 +22,12 @@ extension ArtifactBundleBuilder {
     }
 
     let bundleDirURL = URL(fileURLWithPath: bundleDir)
-    let workDirURL = bundleDirURL.deletingLastPathComponent()
-    let bundleName = bundleDirURL.lastPathComponent
 
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
     let zipPathURL = URL(fileURLWithPath: zipPath).standardizedFileURL
-    process.arguments = ["-r", zipPathURL.path, bundleName]
-    process.currentDirectoryURL = workDirURL
+    process.arguments = ["-r", zipPathURL.path, "."]
+    process.currentDirectoryURL = bundleDirURL
 
     try process.run()
     process.waitUntilExit()
