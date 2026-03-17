@@ -24,9 +24,8 @@ let package = Package(
     .plugin(name: "TailwindCSS", capability: .buildTool(), dependencies: ["TailwindCSSCLI"]),
     .binaryTarget(
       name: "TailwindCSSCLI",
-      url:
-        "https://github.com/laosb/SwiftTailwind/releases/download/TailwindCSSCLI-v4.1.18-1e1d57de8a8984c528a106f038fb432b3965b1873c8603ee6bd661f935a77f4a/tailwindcss.artifactbundleindex",
-      checksum: "1e1d57de8a8984c528a106f038fb432b3965b1873c8603ee6bd661f935a77f4a"
+      url: "https://github.com/laosb/SwiftTailwind/releases/download/TailwindCSSCLI-v4.2.1-e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216/tailwindcss.artifactbundleindex",
+      checksum: "e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216"
     ),
     .target(
       name: "SwiftTailwindExample",
