@@ -7,6 +7,7 @@ extension ArtifactBundleBuilder {
     case "aarch64-apple-darwin":
       [
         "aarch64-apple-darwin",
+        "arm64-apple-macosx",
         "arm64-apple-macosx12.0",
         "arm64-apple-macosx13.0",
         "arm64-apple-macosx14.0",
@@ -16,6 +17,7 @@ extension ArtifactBundleBuilder {
     case "x86_64-apple-darwin":
       [
         "x86_64-apple-darwin",
+        "x86_64-apple-macosx",
         "x86_64-apple-macosx12.0",
         "x86_64-apple-macosx13.0",
         "x86_64-apple-macosx14.0",

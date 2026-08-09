@@ -3,7 +3,11 @@
 import PackageDescription
 
 let tailwindCSSCLITarget: Target =
-  if let artifactURL = Context.environment["SWIFTTAILWIND_CLI_ARTIFACT_URL"],
+  if let artifactPath = Context.environment["SWIFTTAILWIND_CLI_ARTIFACT_PATH"],
+    !artifactPath.isEmpty
+  {
+    .binaryTarget(name: "TailwindCSSCLI", path: artifactPath)
+  } else if let artifactURL = Context.environment["SWIFTTAILWIND_CLI_ARTIFACT_URL"],
     let artifactChecksum = Context.environment["SWIFTTAILWIND_CLI_ARTIFACT_CHECKSUM"],
     !artifactURL.isEmpty,
     !artifactChecksum.isEmpty

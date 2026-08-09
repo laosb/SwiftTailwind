@@ -15,8 +15,6 @@ class ArtifactBundleBuilder {
     BinaryConfiguration(binaryName: "tailwindcss-linux-arm64", triple: "aarch64-unknown-linux-gnu"),
     BinaryConfiguration(binaryName: "tailwindcss-macos-x64", triple: "x86_64-apple-darwin"),
     BinaryConfiguration(binaryName: "tailwindcss-macos-arm64", triple: "aarch64-apple-darwin"),
-    // Since Swift 6.3 toolchain, the Apple Silicon triple changed from aarch64 to arm64.
-    BinaryConfiguration(binaryName: "tailwindcss-macos-arm64", triple: "arm64-apple-macosx"),
   ]
 
   init(version: String, workDir: String, outputDir: String) {
