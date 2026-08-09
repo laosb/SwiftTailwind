@@ -129,6 +129,8 @@ jobs:
       - name: Commit Package.swift update
         shell: bash
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
           if git diff --quiet -- Package.swift; then
             echo "Package.swift already references this artifact bundle."
             exit 0
