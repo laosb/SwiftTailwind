@@ -21,11 +21,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Compute dependency hash
+        id: dependency-hash
+        run: echo "value=$(sha256sum Package.resolved | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+
       - name: Cache Swift packages
         uses: actions/cache@v4
         with:
           path: .build
-          key: ${{ runner.os }}-${{ runner.arch }}-spm-${{ matrix.swift-version }}-${{ hashFiles('**/Package.resolved') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-spm-${{ matrix.swift-version }}-${{ steps.dependency-hash.outputs.value }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-spm-${{ matrix.swift-version }}-
             ${{ runner.os }}-${{ runner.arch }}-spm-
@@ -61,11 +65,11 @@ jobs:
           - arch: arm64
             runner: macos-26
             swift-version: "6.3"
-            xcode-version: "26.3"
+            xcode-version: "26.6"
           - arch: x64
             runner: macos-26-intel
             swift-version: "6.3"
-            xcode-version: "26.3"
+            xcode-version: "26.6"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
