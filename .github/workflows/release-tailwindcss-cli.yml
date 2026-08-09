@@ -11,18 +11,15 @@ on:
 jobs:
   build-and-release:
     name: Build and Release Artifacts
-    runs-on: macos-latest
+    runs-on: ubuntu-26.04
+    container:
+      image: swift:6.3
     permissions:
       contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v3
-        with:
-          swift-version: "6.2"
 
       - name: Cache Swift packages
         uses: actions/cache@v4
@@ -63,7 +60,7 @@ jobs:
       - name: Compute checksum
         id: checksum
         run: |
-          CHECKSUM=$(shasum -a 256 artifacts/tailwindcss.artifactbundleindex | awk '{print $1}')
+          CHECKSUM=$(sha256sum artifacts/tailwindcss.artifactbundleindex | awk '{print $1}')
           echo "checksum=$CHECKSUM" >> $GITHUB_OUTPUT
           echo "Artifact bundle index checksum: $CHECKSUM"
 

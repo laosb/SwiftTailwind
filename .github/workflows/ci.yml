@@ -8,28 +8,26 @@ on:
 
 jobs:
   test-linux:
-    name: Test on Linux
-    runs-on: ubuntu-latest
+    name: Test on Linux (${{ matrix.runner }}, Swift ${{ matrix.swift-version }})
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: swift:${{ matrix.swift-version }}
     strategy:
       matrix:
-        swift-version: ["6.1", "6.2"]
+        swift-version: ["6.1", "6.2", "6.3"]
+        runner: [ubuntu-26.04, ubuntu-26.04-arm]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Swift ${{ matrix.swift-version }}
-        uses: swift-actions/setup-swift@v3
-        with:
-          swift-version: ${{ matrix.swift-version }}
 
       - name: Cache Swift packages
         uses: actions/cache@v4
         with:
           path: .build
-          key: ${{ runner.os }}-spm-${{ matrix.swift-version }}-${{ hashFiles('**/Package.resolved') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-spm-${{ matrix.swift-version }}-${{ hashFiles('**/Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-spm-${{ matrix.swift-version }}-
-            ${{ runner.os }}-spm-
+            ${{ runner.os }}-${{ runner.arch }}-spm-${{ matrix.swift-version }}-
+            ${{ runner.os }}-${{ runner.arch }}-spm-
 
       - name: Build package
         run: swift build --verbose
@@ -38,28 +36,53 @@ jobs:
         run: swift test --verbose
 
   test-macos:
-    name: Test on macOS
-    runs-on: macos-latest
+    name: Test on macOS (${{ matrix.arch }}, Swift ${{ matrix.swift-version }})
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        swift-version: ["6.1", "6.2"]
+        include:
+          - arch: arm64
+            runner: macos-15
+            swift-version: "6.1"
+            xcode-version: "16.3"
+          - arch: x64
+            runner: macos-15-intel
+            swift-version: "6.1"
+            xcode-version: "16.3"
+          - arch: arm64
+            runner: macos-26
+            swift-version: "6.2"
+            xcode-version: "26.0"
+          - arch: x64
+            runner: macos-26-intel
+            swift-version: "6.2"
+            xcode-version: "26.0"
+          - arch: arm64
+            runner: macos-26
+            swift-version: "6.3"
+            xcode-version: "26.3"
+          - arch: x64
+            runner: macos-26-intel
+            swift-version: "6.3"
+            xcode-version: "26.3"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Swift ${{ matrix.swift-version }}
-        uses: swift-actions/setup-swift@v3
-        with:
-          swift-version: ${{ matrix.swift-version }}
+      - name: Select Xcode ${{ matrix.xcode-version }}
+        run: sudo xcode-select --switch /Applications/Xcode_${{ matrix.xcode-version }}.app/Contents/Developer
+
+      - name: Verify Swift version
+        run: swift --version | grep "Swift version ${{ matrix.swift-version }}"
 
       - name: Cache Swift packages
         uses: actions/cache@v4
         with:
           path: .build
-          key: ${{ runner.os }}-spm-${{ matrix.swift-version }}-${{ hashFiles('**/Package.resolved') }}
+          key: ${{ runner.os }}-${{ matrix.arch }}-spm-${{ matrix.swift-version }}-${{ hashFiles('**/Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-spm-${{ matrix.swift-version }}-
-            ${{ runner.os }}-spm-
+            ${{ runner.os }}-${{ matrix.arch }}-spm-${{ matrix.swift-version }}-
+            ${{ runner.os }}-${{ matrix.arch }}-spm-
 
       - name: Build package
         run: swift build --verbose
