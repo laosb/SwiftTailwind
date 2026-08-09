@@ -19,7 +19,7 @@ let tailwindCSSCLITarget: Target =
 
 let package = Package(
   name: "SwiftTailwind",
-  platforms: [.macOS(.v12)],
+  platforms: [.macOS(.v13)],
   products: [
     .plugin(name: "TailwindCSS", targets: ["TailwindCSS"]),
     .executable(name: "TailwindCSSCLIArtifactBundler", targets: ["TailwindCSSCLIArtifactBundler"]),
