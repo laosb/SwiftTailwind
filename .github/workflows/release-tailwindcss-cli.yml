@@ -21,6 +21,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install artifact bundler dependencies
+        run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends zip
+
       - name: Cache Swift packages
         uses: actions/cache@v4
         with:
@@ -31,6 +36,7 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Validate version format
+        shell: bash
         run: |
           if [[ ! "${{ inputs.tailwind_version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Error: Version must be in format vX.Y.Z (e.g., v4.1.14)"
@@ -76,6 +82,7 @@ jobs:
 
             ### Included Artifacts
             - Linux x64 (`x86_64-unknown-linux-gnu`)
+            - Linux ARM64 (`aarch64-unknown-linux-gnu`)
             - macOS x64 (`x86_64-apple-darwin`)
             - macOS ARM64 (`aarch64-apple-darwin`)
 
