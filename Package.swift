@@ -12,8 +12,8 @@ let tailwindCSSCLITarget: Target =
   } else {
     .binaryTarget(
       name: "TailwindCSSCLI",
-      url: "https://github.com/laosb/SwiftTailwind/releases/download/TailwindCSSCLI-v4.2.1-e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216/tailwindcss.artifactbundleindex",
-      checksum: "e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216"
+      url: "https://github.com/laosb/SwiftTailwind/releases/download/TailwindCSSCLI-v4.3.3-516200ec6a6f4b1899cab65a8cf7ec2f60d161844c8772cd8dd51de5a6291c57/tailwindcss.artifactbundleindex",
+      checksum: "516200ec6a6f4b1899cab65a8cf7ec2f60d161844c8772cd8dd51de5a6291c57"
     )
   }
 
