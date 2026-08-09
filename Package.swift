@@ -2,6 +2,21 @@
 
 import PackageDescription
 
+let tailwindCSSCLITarget: Target =
+  if let artifactURL = Context.environment["SWIFTTAILWIND_CLI_ARTIFACT_URL"],
+    let artifactChecksum = Context.environment["SWIFTTAILWIND_CLI_ARTIFACT_CHECKSUM"],
+    !artifactURL.isEmpty,
+    !artifactChecksum.isEmpty
+  {
+    .binaryTarget(name: "TailwindCSSCLI", url: artifactURL, checksum: artifactChecksum)
+  } else {
+    .binaryTarget(
+      name: "TailwindCSSCLI",
+      url: "https://github.com/laosb/SwiftTailwind/releases/download/TailwindCSSCLI-v4.2.1-e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216/tailwindcss.artifactbundleindex",
+      checksum: "e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216"
+    )
+  }
+
 let package = Package(
   name: "SwiftTailwind",
   platforms: [.macOS(.v12)],
@@ -28,11 +43,7 @@ let package = Package(
       ]
     ),
     .plugin(name: "TailwindCSS", capability: .buildTool(), dependencies: ["TailwindCSSCLI"]),
-    .binaryTarget(
-      name: "TailwindCSSCLI",
-      url: "https://github.com/laosb/SwiftTailwind/releases/download/TailwindCSSCLI-v4.2.1-e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216/tailwindcss.artifactbundleindex",
-      checksum: "e8c826ef1e50a546d990602bf922a21515b536e20affd34a35761055a7415216"
-    ),
+    tailwindCSSCLITarget,
     .target(
       name: "SwiftTailwindExample",
       resources: [.copy("Views/Test.html")],

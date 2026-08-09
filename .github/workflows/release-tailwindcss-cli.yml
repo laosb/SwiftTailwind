@@ -20,17 +20,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
 
       - name: Install artifact bundler dependencies
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends zip
 
+      - name: Compute package resolution checksum
+        id: package-resolution
+        run: |
+          checksum=$(sha256sum Package.resolved | awk '{print $1}')
+          echo "checksum=$checksum" >> "$GITHUB_OUTPUT"
+
       - name: Cache Swift packages
         uses: actions/cache@v4
         with:
           path: .build
-          key: ${{ runner.os }}-spm-release-${{ hashFiles('**/Package.resolved') }}
+          key: ${{ runner.os }}-spm-release-${{ steps.package-resolution.outputs.checksum }}
           restore-keys: |
             ${{ runner.os }}-spm-release-
             ${{ runner.os }}-spm-
@@ -100,3 +108,34 @@ jobs:
           files: |
             artifacts/*.zip
             artifacts/tailwindcss.artifactbundleindex
+
+      - name: Update Package.swift
+        shell: bash
+        run: |
+          artifact_tag="TailwindCSSCLI-${{ inputs.tailwind_version }}-${{ steps.checksum.outputs.checksum }}"
+          artifact_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${artifact_tag}/tailwindcss.artifactbundleindex"
+          artifact_checksum="${{ steps.checksum.outputs.checksum }}"
+
+          sed --in-place --regexp-extended \
+            's#url: "https://github.com/[^\"]+/[^\"]+/releases/download/TailwindCSSCLI-[^\"]+/tailwindcss\.artifactbundleindex"#url: "'"${artifact_url}"'"#' \
+            Package.swift
+          sed --in-place --regexp-extended \
+            's#checksum: "[0-9a-f]{64}"#checksum: "'"${artifact_checksum}"'"#' \
+            Package.swift
+
+          grep --fixed-strings --quiet "url: \"${artifact_url}\"" Package.swift
+          grep --fixed-strings --quiet "checksum: \"${artifact_checksum}\"" Package.swift
+
+      - name: Commit Package.swift update
+        shell: bash
+        run: |
+          if git diff --quiet -- Package.swift; then
+            echo "Package.swift already references this artifact bundle."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Package.swift
+          git commit --message "Update TailwindCSS CLI to ${{ inputs.tailwind_version }}"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
