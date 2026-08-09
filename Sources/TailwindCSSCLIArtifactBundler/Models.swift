@@ -1,4 +1,8 @@
-import Foundation
+#if canImport(FoundationEssentials)
+  import FoundationEssentials
+#else
+  import Foundation
+#endif
 
 // MARK: - Artifact Bundle Info Models
 
@@ -28,7 +32,8 @@ struct ArtifactVariant: Codable {
 /// Represents the .artifactbundleindex file structure
 struct ArtifactBundleIndex: Codable {
   let schemaVersion: String
-  let archives: [Bundle]  // The proposal says it's "bundles" but the actual implementation uses "archives"
+  // The proposal says it's "bundles", but the actual implementation uses "archives".
+  let archives: [Bundle]
 }
 
 struct Bundle: Codable {

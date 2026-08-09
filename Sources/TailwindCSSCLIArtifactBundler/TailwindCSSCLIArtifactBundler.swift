@@ -1,8 +1,7 @@
 import ArgumentParser
-import Foundation
 
 @main
-struct TailwindCSSCLIArtifactBundler: ParsableCommand {
+struct TailwindCSSCLIArtifactBundler: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "TailwindCSSCLIArtifactBundler",
     abstract: "Build TailwindCSS CLI artifact bundles for Swift Package Manager",
@@ -18,7 +17,7 @@ struct TailwindCSSCLIArtifactBundler: ParsableCommand {
   @Option(name: .shortAndLong, help: "Output directory for the artifact bundle index")
   var outputDir: String = "."
 
-  func run() throws {
+  func run() async throws {
     print("Building artifact bundles for TailwindCSS version: \(version)")
 
     let bundler = ArtifactBundleBuilder(
@@ -27,6 +26,6 @@ struct TailwindCSSCLIArtifactBundler: ParsableCommand {
       outputDir: outputDir
     )
 
-    try bundler.buildArtifactBundles()
+    try await bundler.buildArtifactBundles()
   }
 }

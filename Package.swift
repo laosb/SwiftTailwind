@@ -12,6 +12,11 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.7.0"),
     .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0"..<"5.0.0"),
+    .package(
+      url: "https://github.com/swiftlang/swift-subprocess.git",
+      .upToNextMinor(from: "0.4.0"),
+      traits: []
+    ),
   ],
   targets: [
     .executableTarget(
@@ -19,6 +24,7 @@ let package = Package(
       dependencies: [
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "Crypto", package: "swift-crypto"),
+        .product(name: "Subprocess", package: "swift-subprocess"),
       ]
     ),
     .plugin(name: "TailwindCSS", capability: .buildTool(), dependencies: ["TailwindCSSCLI"]),

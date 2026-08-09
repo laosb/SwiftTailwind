@@ -1,4 +1,8 @@
-import Foundation
+#if canImport(FoundationEssentials)
+  import FoundationEssentials
+#else
+  import Foundation
+#endif
 
 class ArtifactBundleBuilder {
   private let version: String
@@ -8,6 +12,7 @@ class ArtifactBundleBuilder {
 
   private let binaryConfigurations: [BinaryConfiguration] = [
     BinaryConfiguration(binaryName: "tailwindcss-linux-x64", triple: "x86_64-unknown-linux-gnu"),
+    BinaryConfiguration(binaryName: "tailwindcss-linux-arm64", triple: "aarch64-unknown-linux-gnu"),
     BinaryConfiguration(binaryName: "tailwindcss-macos-x64", triple: "x86_64-apple-darwin"),
     BinaryConfiguration(binaryName: "tailwindcss-macos-arm64", triple: "aarch64-apple-darwin"),
     // Since Swift 6.3 toolchain, the Apple Silicon triple changed from aarch64 to arm64.
@@ -20,14 +25,14 @@ class ArtifactBundleBuilder {
     self.outputDir = outputDir
   }
 
-  func buildArtifactBundles() throws {
+  func buildArtifactBundles() async throws {
     try setupWorkingDirectory()
 
     var bundleInfos: [BundleInfo] = []
 
     print("Creating individual bundles...")
     for config in binaryConfigurations {
-      let bundleInfo = try createBundle(for: config)
+      let bundleInfo = try await createBundle(for: config)
       bundleInfos.append(bundleInfo)
     }
 
@@ -40,7 +45,7 @@ class ArtifactBundleBuilder {
     print("")
 
     let indexChecksum = try computeChecksum(
-      filePath: "\(outputDir)/tailwindcss.artifactbundleindex", usingSHA256Directly: true)
+      filePath: "\(outputDir)/tailwindcss.artifactbundleindex")
     print("Index checksum: \(indexChecksum)")
     print("")
 
@@ -62,7 +67,7 @@ class ArtifactBundleBuilder {
     try fileManager.createDirectory(atPath: workDir, withIntermediateDirectories: true)
   }
 
-  private func createBundle(for config: BinaryConfiguration) throws -> BundleInfo {
+  private func createBundle(for config: BinaryConfiguration) async throws -> BundleInfo {
     let bundleDirName = "tailwindcss-\(version)-\(config.triple).artifactbundle"
     let bundleDir = "\(workDir)/\(bundleDirName)"
     let binaryPath = "bin/tailwindcss"
@@ -79,7 +84,7 @@ class ArtifactBundleBuilder {
       "https://github.com/tailwindlabs/tailwindcss/releases/download/\(version)/\(config.binaryName)"
     let binaryDestination = "\(bundleDir)/\(binaryPath)"
 
-    try downloadFile(from: binaryURL, to: binaryDestination)
+    try await downloadFile(from: binaryURL, to: binaryDestination)
     try makeExecutable(path: binaryDestination)
     print("  ✓ Downloaded and made executable: \(binaryDestination)")
 
@@ -94,7 +99,7 @@ class ArtifactBundleBuilder {
     let zipPath = "\(outputDir)/\(zipFileName)"
     print("  Creating ZIP file: \(zipPath)")
 
-    try createZipFile(bundleDir: bundleDir, zipPath: zipPath)
+    try await createZipFile(bundleDir: bundleDir, zipPath: zipPath)
 
     // Compute checksum
     print("  Computing checksum...")

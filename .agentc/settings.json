@@ -1,0 +1,10 @@
+{
+  "agent" : {
+    "configurations" : [
+      "claude"
+    ],
+    "cpus" : 2,
+    "image" : "swift:6.3",
+    "memoryMiB" : 1536
+  }
+}
